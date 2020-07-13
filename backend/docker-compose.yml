@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  bdd:
+    image: postgres:11
+    env_file:
+      - bdd.env
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  maven:
+    build:
+      context: .
+      dockerfile: docker-maven/Dockerfile
+    volumes:
+      - mvn_cache:/root/.m2
+      - jar_dir:/dist
+
+  back:
+    build:
+      context: .
+      dockerfile: docker-java/Dockerfile
+    env_file:
+      - bdd.env
+    volumes:
+      - jar_dir:/dist
+    ports:
+      - "8078:8080"
+
+volumes:
+  user_data:
+  mvn_cache:
+  jar_dir:
